@@ -19,6 +19,12 @@
       <form action="/modify?_method=PUT" method="POST">
         <div style="width: 80%; margin: auto">
           <div class="mb-3">
+            <input
+              type="text"
+              value="<%=data._id %>"
+              style="display: none"
+              name="id"
+            />
             <label class="form-label">Todo</label>
             <input
               type="text"
