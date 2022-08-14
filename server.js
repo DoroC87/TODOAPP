@@ -57,7 +57,6 @@ app.get("/list", function (req, res) {
   db.collection("post")
     .find()
     .toArray((e, result) => {
-      console.log(result);
       res.render("list.ejs", { posts: result });
     });
 });
@@ -70,4 +69,14 @@ app.delete("/delete", (req, res) => {
     console.log("Delete Complete!");
     res.status(200).send({ message: "Complete" });
   });
+});
+
+// detailページ
+app.get("/detail/:id", (req, res) => {
+  db.collection("post").findOne(
+    { _id: parseInt(req.params.id) },
+    (e, result) => {
+      res.render("detail.ejs", { data: result });
+    }
+  );
 });
