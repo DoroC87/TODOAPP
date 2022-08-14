@@ -16,20 +16,19 @@
     <%- include('nav.html')%>
 
     <div class="container mt-4">
-      <h4 class="text-center">詳細ページ</h4>
-      <div class="card" style="width: 100%">
-        <div class="card-body">
-          <h5 class="card-title"><%=data.title %></h5>
-          <h6 class="card-subtitle mb-2 text-muted">
-            Due date : <%=data.date %>
-          </h6>
-          <p class="card-text">
-            Some quick example text to build on the card title and make up the
-            bulk of the card's content.
-          </p>
-          <a href="#" class="card-link">Modify</a>
+      <form action="/add" method="POST">
+        <div style="width: 80%; margin: auto">
+          <div class="mb-3">
+            <label class="form-label">Todo</label>
+            <input type="text" class="form-control" name="title" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Due date</label>
+            <input type="date" class="form-control" name="date" />
+          </div>
+          <button type="submit" class="btn btn-outline-primary">Submit</button>
         </div>
-      </div>
+      </form>
     </div>
 
     <script

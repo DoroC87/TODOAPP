@@ -12,60 +12,36 @@
     />
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-light">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">Todo App</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarText"
-          aria-controls="navbarText"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarText">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/write">Write</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/list">List</a>
-            </li>
-          </ul>
-          <span class="navbar-text"> Navbar text with an inline element </span>
-        </div>
-      </div>
-    </nav>
+    <!-- nav -->
+    <%- include('nav.html')%>
 
-    <h1 class="ml-2 my-3">Todo List</h1>
-    <ol class="list-group">
-      <% for(let i=0; i < posts.length; i++) { %>
-      <li class="list-group-item">
-        <div class="fw-bold">
-          <h4><a href="/detail/<%=posts[i]._id %>"><%=posts[i].title %></a></h4>
-        </div>
-        <p>Due date : <%=posts[i].date %></p>
-        <button
-          type="button"
-          class="btn btn-outline-primary delete"
-          style="
-            --bs-btn-padding-y: 0.25rem;
-            --bs-btn-padding-x: 0.5rem;
-            --bs-btn-font-size: 0.75rem;
-          "
-          data-id="<%=posts[i]._id %>"
-        >
-          Delete
-        </button>
-      </li>
-      <% } %>
-    </ol>
+    <div class="container mt-4">
+      <h4 class="text-center">Todo List</h4>
+      <ol class="list-group">
+        <% for(let i=0; i < posts.length; i++) { %>
+        <li class="list-group-item">
+          <div class="fw-bold">
+            <h4>
+              <a href="/detail/<%=posts[i]._id %>"><%=posts[i].title %></a>
+            </h4>
+          </div>
+          <p>Due date : <%=posts[i].date %></p>
+          <button
+            type="button"
+            class="btn btn-outline-primary delete"
+            style="
+              --bs-btn-padding-y: 0.25rem;
+              --bs-btn-padding-x: 0.5rem;
+              --bs-btn-font-size: 0.75rem;
+            "
+            data-id="<%=posts[i]._id %>"
+          >
+            Delete
+          </button>
+        </li>
+        <% } %>
+      </ol>
+    </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
       $(".delete").click((e) => {
