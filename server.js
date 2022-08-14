@@ -22,11 +22,11 @@ app.listen(8080, function () {
 });
 
 app.get("/", function (req, res) {
-  res.sendFile(__dirname + "/index.html");
+  res.render("index.ejs");
 });
 
 app.get("/write", function (req, res) {
-  res.sendFile(__dirname + "/write.html");
+  res.render("write.ejs");
 });
 
 // add画面のpost
