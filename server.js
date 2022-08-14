@@ -61,3 +61,13 @@ app.get("/list", function (req, res) {
       res.render("list.ejs", { posts: result });
     });
 });
+
+// listから削除機能
+app.delete("/delete", (req, res) => {
+  //idを数字に変換
+  req.body._id = parseInt(req.body._id);
+  db.collection("post").deleteOne(req.body, (e, result) => {
+    console.log("Delete Complete!");
+    res.status(200).send({ message: "Complete" });
+  });
+});
