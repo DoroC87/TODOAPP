@@ -43,46 +43,22 @@
       </div>
     </nav>
 
-    <h1 class="ml-2 my-3">Todo List</h1>
-    <ol class="list-group">
-      <% for(let i=0; i < posts.length; i++) { %>
-      <li class="list-group-item">
-        <div class="fw-bold">
-          <h4><a href="/detail/<%=posts[i]._id %>"><%=posts[i].title %></a></h4>
+    <div class="container mt-4">
+      <h4 class="text-center">詳細ページ</h4>
+      <div class="card" style="width: 100%">
+        <div class="card-body">
+          <h5 class="card-title"><%=data.title %></h5>
+          <h6 class="card-subtitle mb-2 text-muted">
+            Due date : <%=data.date %>
+          </h6>
+          <p class="card-text">
+            Some quick example text to build on the card title and make up the
+            bulk of the card's content.
+          </p>
+          <a href="#" class="card-link">Modify</a>
         </div>
-        <p>Due date : <%=posts[i].date %></p>
-        <button
-          type="button"
-          class="btn btn-outline-primary delete"
-          style="
-            --bs-btn-padding-y: 0.25rem;
-            --bs-btn-padding-x: 0.5rem;
-            --bs-btn-font-size: 0.75rem;
-          "
-          data-id="<%=posts[i]._id %>"
-        >
-          Delete
-        </button>
-      </li>
-      <% } %>
-    </ol>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-      $(".delete").click((e) => {
-        $.ajax({
-          method: "DELETE",
-          url: "/delete",
-          data: { _id: e.target.dataset.id },
-        })
-          .done((result) => {
-            console.log("complete!");
-            $(e.target).parents("li").fadeOut();
-          })
-          .fail((xhr, textStatus, errorThrow) => {
-            console.log(xhr, textStatus, errorThrow);
-          });
-      });
-    </script>
+      </div>
+    </div>
 
     <script
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js"
