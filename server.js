@@ -6,6 +6,9 @@ const MongoClient = require("mongodb").MongoClient;
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// DBの接続
+var db;
+
 app.listen(8080, function () {
   MongoClient.connect(
     "mongodb+srv://admin:pw1234@cluster0.kbtphjb.mongodb.net/?retryWrites=true&w=majority",
@@ -26,15 +29,27 @@ app.get("/write", function (req, res) {
   res.sendFile(__dirname + "/write.html");
 });
 
-// DBの接続
-var db;
+// add画面のpost
 app.post("/add", function (req, res) {
-  db.collection("post").insertOne(
-    { title: req.body.title, date: req.body.date },
-    (e, result) => {
-      console.log("insert complete!");
-    }
-  );
+  // idのauto_increment情報検索
+  db.collection("counter").findOne({ name: "datacount" }, (e, result) => {
+    let totalcount = result.totalPost;
+    // 画面で入力した情報をDBへ登録
+    db.collection("post").insertOne(
+      { _id: totalcount, title: req.body.title, date: req.body.date },
+      (e, result) => {
+        console.log("insert complete!");
+        // idのauto_increment増加
+        db.collection("counter").updateOne(
+          { name: "datacount" },
+          { $inc: { totalPost: 1 } },
+          (e, result) => {
+            return console.log(e);
+          }
+        );
+      }
+    );
+  });
 });
 
 // todo list 確認ページ
@@ -45,4 +60,14 @@ app.get("/list", function (req, res) {
       console.log(result);
       res.render("list.ejs", { posts: result });
     });
+});
+
+// listから削除機能
+app.delete("/delete", (req, res) => {
+  //idを数字に変換
+  req.body._id = parseInt(req.body._id);
+  db.collection("post").deleteOne(req.body, (e, result) => {
+    console.log("Delete Complete!");
+    res.status(200).send({ message: "Complete" });
+  });
 });
