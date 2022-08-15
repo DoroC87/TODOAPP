@@ -11,6 +11,9 @@ const methodOverride = require("method-override");
 const { Db } = require("mongodb");
 app.use(methodOverride("_method"));
 
+// 環境変数設定
+require("dotenv").config();
+
 // ログイン用(session)
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
@@ -70,24 +73,35 @@ passport.use(
 passport.serializeUser(function (user, done) {
   done(null, user.id);
 });
-
+// ログインユーザーの情報格納
 passport.deserializeUser(function (id, done) {
-  done(null, {});
+  db.collection("account").findOne({ id: id }, function (e, result) {
+    done(null, { result });
+  });
+});
+
+// ログインチェック
+function loginCheck(req, res, next) {
+  if (req.user) next();
+  else res.send("ログインしてください");
+}
+
+// [MyPage]初期表示
+app.get("/mypage", loginCheck, function (req, res) {
+  console.log(req.user.result);
+  res.render("mypage.ejs", { userInfo: req.user.result });
 });
 
 // DBの接続
 var db;
 
 app.listen(8080, function () {
-  MongoClient.connect(
-    "mongodb+srv://admin:pw1234@cluster0.kbtphjb.mongodb.net/?retryWrites=true&w=majority",
-    (e, client) => {
-      // エラー検知
-      if (e) return console.log(e);
+  MongoClient.connect(process.env.DB_URL, (e, client) => {
+    // エラー検知
+    if (e) return console.log(e);
 
-      db = client.db("todoapp");
-    }
-  );
+    db = client.db("todoapp");
+  });
 });
 
 // [Home]初期表示
