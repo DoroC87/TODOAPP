@@ -16,17 +16,19 @@
     <%- include('nav.html')%>
 
     <div class="container mt-4">
-      <form action="/add" method="POST">
+      <form action="/login" method="POST">
         <div style="width: 80%; margin: auto">
           <div class="mb-3">
-            <label class="form-label">Todo</label>
-            <input type="text" class="form-control" name="title" />
+            <label class="form-label">ID</label>
+            <input type="text" class="form-control" name="id" />
           </div>
           <div class="mb-3">
-            <label class="form-label">Due date</label>
-            <input type="date" class="form-control" name="date" />
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" name="pw" />
           </div>
-          <button type="submit" class="btn btn-outline-primary">登録</button>
+          <button type="submit" class="btn btn-outline-primary">
+            ログイン
+          </button>
         </div>
       </form>
     </div>
