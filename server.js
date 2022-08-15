@@ -24,6 +24,18 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// DBの接続
+var db;
+
+app.listen(process.env.PORT, function () {
+  MongoClient.connect(process.env.DB_URL, (e, client) => {
+    // エラー検知
+    if (e) return console.log(e);
+
+    db = client.db(process.env.SCHEMA);
+  });
+});
+
 // [Login]初期表示
 app.get("/login", function (req, res) {
   res.render("login.ejs");
@@ -88,40 +100,35 @@ function loginCheck(req, res, next) {
 
 // [MyPage]初期表示
 app.get("/mypage", loginCheck, function (req, res) {
-  console.log(req.user.result);
   res.render("mypage.ejs", { userInfo: req.user.result });
 });
 
-// DBの接続
-var db;
-
-app.listen(8080, function () {
-  MongoClient.connect(process.env.DB_URL, (e, client) => {
-    // エラー検知
-    if (e) return console.log(e);
-
-    db = client.db("todoapp");
-  });
-});
-
 // [Home]初期表示
-app.get("/", function (req, res) {
+app.get("/", loginCheck, function (req, res) {
   res.render("index.ejs");
 });
 // [Write]初期表示
-app.get("/write", function (req, res) {
+app.get("/write", loginCheck, function (req, res) {
   res.render("write.ejs");
 });
 
 // [Write]submitボタン押下
 // Dbへinsert処理
-app.post("/add", function (req, res) {
+// 2022/08/15 add writer create_date update_date
+app.post("/add", loginCheck, function (req, res) {
   // idのauto_increment情報検索
   db.collection("counter").findOne({ name: "datacount" }, (e, result) => {
     let totalcount = result.totalPost;
     // 画面で入力した情報をDBへ登録
     db.collection("post").insertOne(
-      { _id: totalcount, title: req.body.title, date: req.body.date },
+      {
+        _id: totalcount,
+        title: req.body.title,
+        date: req.body.date,
+        writer: req.user.result.id,
+        create_date: new Date(),
+        update_date: new Date(),
+      },
       (e, result) => {
         console.log("insert complete!");
         // idのauto_increment増加
@@ -139,9 +146,10 @@ app.post("/add", function (req, res) {
 });
 
 // [List]初期表示
-app.get("/list", function (req, res) {
+// 2022/08/15 本人作成データのみ表示追加
+app.get("/list", loginCheck, function (req, res) {
   db.collection("post")
-    .find()
+    .find({ writer: req.user.result.id })
     .toArray((e, result) => {
       res.render("list.ejs", { posts: result });
     });
@@ -149,7 +157,7 @@ app.get("/list", function (req, res) {
 
 // [List]削除ボタン押下
 // Dbへdelete処理
-app.delete("/delete", (req, res) => {
+app.delete("/delete", loginCheck, (req, res) => {
   //idを数字に変換
   req.body._id = parseInt(req.body._id);
   db.collection("post").deleteOne(req.body, (e, result) => {
@@ -159,7 +167,7 @@ app.delete("/delete", (req, res) => {
 });
 
 // [Detail]初期表示
-app.get("/detail/:id", (req, res) => {
+app.get("/detail/:id", loginCheck, (req, res) => {
   db.collection("post").findOne(
     { _id: parseInt(req.params.id) },
     (e, result) => {
@@ -169,7 +177,7 @@ app.get("/detail/:id", (req, res) => {
 });
 
 // [Edit]初期表示
-app.get("/edit/:id", (req, res) => {
+app.get("/edit/:id", loginCheck, (req, res) => {
   db.collection("post").findOne(
     { _id: parseInt(req.params.id) },
     (e, result) => {
@@ -180,10 +188,17 @@ app.get("/edit/:id", (req, res) => {
 
 // [Edit]modifyボタン押下
 // Dbへupdate処理
-app.put("/modify", (req, res) => {
+// 2022/08/15 add update_date
+app.put("/modify", loginCheck, (req, res) => {
   db.collection("post").updateOne(
     { _id: parseInt(req.body.id) },
-    { $set: { title: req.body.title, date: req.body.date } },
+    {
+      $set: {
+        title: req.body.title,
+        date: req.body.date,
+        update_date: new Date(),
+      },
+    },
     (e, result) => {
       console.log("Modify Complete!");
       res.redirect("/list");
