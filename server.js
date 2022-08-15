@@ -11,6 +11,70 @@ const methodOverride = require("method-override");
 const { Db } = require("mongodb");
 app.use(methodOverride("_method"));
 
+// ログイン用(session)
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
+const session = require("express-session");
+app.use(
+  session({ secret: "secretCode", resave: true, saveUninitialized: false })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+// [Login]初期表示
+app.get("/login", function (req, res) {
+  res.render("login.ejs");
+});
+// [Login]submitボタン押下
+app.post(
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/fail",
+  }),
+  function (req, res) {
+    res.redirect("/");
+  }
+);
+// ログイン認証
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: "id",
+      passwordField: "pw",
+      session: true,
+      passReqToCallback: false,
+    },
+    function (input_id, input_pw, done) {
+      // アカウント情報検索
+      db.collection("account").findOne({ id: input_id }, function (e, result) {
+        if (e) return done(e);
+
+        if (!result)
+          return done(null, false, {
+            message: "該当するアカウントを見つかれませんでした。",
+          });
+        if (input_pw == result.pw) {
+          return done(null, result);
+        } else {
+          return done(null, false, {
+            message:
+              "パスワードが異なります。パスワードのご確認のうえお願いします",
+          });
+        }
+      });
+    }
+  )
+);
+
+// ログイン成功後、セッション生成
+passport.serializeUser(function (user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function (id, done) {
+  done(null, {});
+});
+
 // DBの接続
 var db;
 
