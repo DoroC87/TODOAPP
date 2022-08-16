@@ -67,12 +67,12 @@ passport.use(
       // アカウント情報検索
       db.collection("account").findOne({ id: input_id }, function (e, result) {
         if (e) return done(e);
-
         if (!result)
           return done(null, false, {
             message: "該当するアカウントを見つかれませんでした。",
           });
-        if (input_pw == result.pw) {
+        // PW比較
+        if (bcrypt.compareSync(input_pw, result.pw)) {
           return done(null, result);
         } else {
           return done(null, false, {
@@ -100,20 +100,30 @@ passport.deserializeUser(function (id, done) {
 app.get("/register", function (req, res) {
   res.render("register.ejs");
 });
+
 // [Register]会員登録ボタン押下
 // Dbへinsert処理
 app.post("/register", function (req, res) {
-  // 画面で入力した情報をDBへ登録
-  db.collection("account").insertOne(
-    {
-      id: req.body.id,
-      pw: req.body.pw,
-    },
-    (e, result) => {
-      console.log("insert complete!");
+  // アカウント情報検索
+  db.collection("account").findOne({ id: req.body.id }, function (e, result) {
+    if (e) return done(e);
+
+    if (result) {
+      res.send("入力されたIDは使用されてます、別のIDを入力してください。");
+    } else {
+      // 画面で入力した情報をDBへ登録
+      db.collection("account").insertOne(
+        {
+          id: req.body.id,
+          pw: hashedPW,
+        },
+        (e, result) => {
+          console.log("insert complete!");
+          res.redirect("/login");
+        }
+      );
     }
-  );
-  res.redirect("/login");
+  });
 });
 
 // ログインチェック

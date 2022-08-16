@@ -64,12 +64,6 @@
         } else if (document.getElementById("pw").value == "") {
           alert("PWは必須です。");
           e.preventDefault();
-        } else if (document.getElementById("pw").value.length < 6) {
-          alert("PWは、6文字以上入力してください。");
-          e.preventDefault();
-        } else if (!/[A-Z]/.test(document.getElementById("pw").value)) {
-          alert("PWは、少なくとも大文字一個以上入力してください。");
-          e.preventDefault();
         }
       });
     </script>
