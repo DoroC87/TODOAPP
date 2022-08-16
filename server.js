@@ -24,6 +24,10 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// PW暗号化
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
+
 // DBの接続
 var db;
 
@@ -90,6 +94,26 @@ passport.deserializeUser(function (id, done) {
   db.collection("account").findOne({ id: id }, function (e, result) {
     done(null, { result });
   });
+});
+
+// [Register]初期表示
+app.get("/register", function (req, res) {
+  res.render("register.ejs");
+});
+// [Register]会員登録ボタン押下
+// Dbへinsert処理
+app.post("/register", function (req, res) {
+  // 画面で入力した情報をDBへ登録
+  db.collection("account").insertOne(
+    {
+      id: req.body.id,
+      pw: req.body.pw,
+    },
+    (e, result) => {
+      console.log("insert complete!");
+    }
+  );
+  res.redirect("/login");
 });
 
 // ログインチェック
