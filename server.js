@@ -8,8 +8,8 @@ app.set("view engine", "ejs");
 
 app.use("/public", express.static("public"));
 /** method-override */
-const methodOverride = require('method-override')
-app.use(methodOverride('_method'))
+const methodOverride = require("method-override");
+app.use(methodOverride("_method"));
 
 var db;
 MongoClient.connect(
@@ -82,7 +82,6 @@ app.get("/detail/:id", (req, res) => {
   db.collection("post").findOne(
     { _id: parseInt(req.params.id) },
     function (e, result) {
-      console.log(result);
       res.render("detail.ejs", { data: result });
     }
   );
@@ -93,6 +92,16 @@ app.get("/edit/:id", (req, res) => {
     { _id: parseInt(req.params.id) },
     function (e, result) {
       res.render("edit.ejs", { data: result });
+    }
+  );
+});
+
+app.put("/edit", function (req, res) {
+  db.collection("post").updateOne(
+    { _id: parseInt(req.body.id) },
+    { $set: { title: req.body.title, date: req.body.date } },
+    function (e, result) {
+      res.redirect('/list')
     }
   );
 });
