@@ -156,5 +156,24 @@ passport.serializeUser(function (user, done) {
 });
 // 이 세션 데이터를 가진 사람을 DB에서 찾아주세요(마이페이지 접속시 발동)
 passport.deserializeUser(function (id, done) {
-  done(null, {});
+  db.collection("login").findOne({ id: id }, (e, result) => {
+    done(null, result);
+  });
 });
+// mypage
+app.get("/mypage", loginCheck, function (req, res) {
+  res.render("mypage.ejs",{user : req.user});
+});
+/**
+ * 로그인 체크
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+function loginCheck(req, res, next) {
+  if (req.user) {
+    next();
+  } else {
+    res.send("not LOGIN");
+  }
+}
