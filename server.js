@@ -19,6 +19,11 @@ const session = require("express-session");
 app.use(session({ secret: "dorothy", resave: true, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
+/**
+ * PW 암호화를 위한 bcrypt
+ */
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 var db;
 MongoClient.connect(
@@ -141,11 +146,14 @@ passport.use(
         if (e) return done(e);
         if (!result)
           return done(null, false, { message: "존재하지않는 아이디요" });
-        if (pw == result.pw) {
-          return done(null, result);
-        } else {
-          return done(null, false, { message: "비번틀렸어요" });
-        }
+        bcrypt.compare(pw, result.pw, (e, equal) => {
+          if (e) return done(e);
+          if (equal) {
+            return done(null, result);
+          } else {
+            return done(null, false, { message: "비번틀렸어요" });
+          }
+        });
       });
     }
   )
@@ -183,25 +191,32 @@ app.get("/join", function (req, res) {
 });
 
 // POST : join 회원가입 submit
-app.post("/join", function (req, res) {
-  db.collection("login").insertOne(
-    {
-      id: req.body.id,
-      pw: req.body.pw,
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-      email: req.body.email,
-    },
-    (e, postResult) => {
-      if (e) return console.log(e);
-      res.send("send complete");
-    }
-  );
+app.post("/join", async function (req, res) {
+  bcrypt.genSalt(saltRounds, (err, salt) => {
+    if (err) console.log(err);
+    // pw 암호화하기
+    bcrypt.hash(req.body.pw, salt, (e, hash) => {
+      if (e) console.log(e);
+      db.collection("login").insertOne(
+        {
+          id: req.body.id,
+          pw: hash,
+          firstname: req.body.firstname,
+          lastname: req.body.lastname,
+          email: req.body.email,
+        },
+        (e, postResult) => {
+          if (e) return console.log(e);
+          res.send("send complete");
+        }
+      );
+    });
+  });
 });
 
 // 회원 가입 전 id check
 app.post("/check", (req, res) => {
-  db.collection("login").findOne(req.body , (e, result) => {
+  db.collection("login").findOne(req.body, (e, result) => {
     res.send({ data: result });
   });
 });
