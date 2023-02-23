@@ -162,13 +162,13 @@ passport.deserializeUser(function (id, done) {
 });
 // mypage
 app.get("/mypage", loginCheck, function (req, res) {
-  res.render("mypage.ejs",{user : req.user});
+  res.render("mypage.ejs", { user: req.user });
 });
 /**
  * 로그인 체크
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
  */
 function loginCheck(req, res, next) {
   if (req.user) {
@@ -177,3 +177,24 @@ function loginCheck(req, res, next) {
     res.send("not LOGIN");
   }
 }
+// GET : join 회원가입화면보여주기
+app.get("/join", function (req, res) {
+  res.render("join.ejs");
+});
+
+// POST : join 회원가입 submit
+app.post("/join", function (req, res) {
+  db.collection("login").insertOne(
+    {
+      id: req.body.id,
+      pw: req.body.pw,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      email: req.body.email,
+    },
+    (e, postResult) => {
+      if (e) return console.log(e);
+      res.send("send complete");
+    }
+  );
+});

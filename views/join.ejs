@@ -11,22 +11,32 @@
 
 <body>
 
-    <h4 class="container mt-4"><strong>Login Page</strong></h4>
+    <h4 class="container mt-4"><strong>회원가입</strong></h4>
 
     <div class="container mt-3">
-        <form action="/login" method="POST">
+        <form action="/join" method="POST">
             <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Account</label>
-                <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="id">
-                <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                <label for="inputId" class="form-label">ID</label>
+                <input type="text" class="form-control" id="inputId" name="id" aria-describedby="default input">
             </div>
             <div class="mb-3">
-                <label for="exampleInputPassword1" class="form-label">Password</label>
-                <input type="password" class="form-control" id="exampleInputPassword1" name="pw">
+                <label for="inputPassword" class="form-label">Password</label>
+                <input type="password" class="form-control" id="inputPassword" name="pw">
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <div class="mb-3">
+                <label for="inputFirstName" class="form-label">First name</label>
+                <input type="text" aria-label="First name" class="form-control" name="firstname" placeholder="First name">
+            </div>
+            <div class="mb-3">
+                <label for="inputLastName" class="form-label">Last name</label>
+                <input type="text" aria-label="Last name" class="form-control" name="lastname" placeholder="Last name">
+            </div>
+            <div class="mb-3">
+                <label for="inputEmail" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="inputEmail" name="email" aria-describedby="email">
+            </div>
+            <button type="submit" class="btn btn-primary">회원가입</button>
         </form>
-        <a href="/join" class="stretched-link">회원가입</a>
     </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
