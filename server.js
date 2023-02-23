@@ -54,19 +54,22 @@ app.post("/add", (req, res) => {
   db.collection("counter").findOne({ name: "countPost" }, (e, result) => {
     if (e) return console.log(e);
     var totalPost = result.totalPost;
-    db.collection("post").insertOne(
-      { _id: totalPost + 1, title: req.body.title, date: req.body.date },
-      (e, postResult) => {
-        db.collection("counter").updateOne(
-          { name: "countPost" },
-          { $inc: { totalPost: 1 } },
-          function (e, result) {
-            if (e) return console.log(e);
-            res.send("send complete");
-          }
-        );
-      }
-    );
+    let insertValue = {
+      _id: totalPost + 1,
+      title: req.body.title,
+      date: req.body.date,
+      createUser: req.user.id,
+    };
+    db.collection("post").insertOne(insertValue, (e, postResult) => {
+      db.collection("counter").updateOne(
+        { name: "countPost" },
+        { $inc: { totalPost: 1 } },
+        function (e, result) {
+          if (e) return console.log(e);
+          res.send("send complete");
+        }
+      );
+    });
   });
 });
 
@@ -80,13 +83,17 @@ app.get("/list", (req, res) => {
   db.collection("post")
     .find()
     .toArray(function (e, result) {
-      res.render("list.ejs", { posts: result });
+      res.render("list.ejs", { posts: result, userId: req.user.id });
     });
 });
 
 app.delete("/delete", (req, res) => {
   req.body._id = parseInt(req.body._id);
-  db.collection("post").deleteOne(req.body, function (e, result) {
+  let deleteData = { _id: req.body._id, createUser: req.user.id };
+  db.collection("post").deleteOne(deleteData, function (e, result) {
+    if (e) {
+      console.log(e);
+    }
     res.status(200).send({ message: "succesed" });
   });
   // res.send("delete complete");
@@ -96,7 +103,7 @@ app.get("/detail/:id", (req, res) => {
   db.collection("post").findOne(
     { _id: parseInt(req.params.id) },
     function (e, result) {
-      res.render("detail.ejs", { data: result });
+      res.render("detail.ejs", { data: result, userId: req.user.id});
     }
   );
 });
@@ -207,7 +214,7 @@ app.post("/join", async function (req, res) {
         },
         (e, postResult) => {
           if (e) return console.log(e);
-          res.send("send complete");
+          res.redirect("/login.ejs");
         }
       );
     });
@@ -236,7 +243,6 @@ app.get("/search", (req, res) => {
   db.collection("post")
     .aggregate(search)
     .toArray((e, result) => {
-      console.log(result);
-      res.render("search.ejs", { posts: result });
+      res.render("search.ejs", { posts: result, userId: req.user.id });
     });
 });
