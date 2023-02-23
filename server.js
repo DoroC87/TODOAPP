@@ -3,6 +3,8 @@ const app = express();
 const bodyParser = require("body-parser");
 app.use(express.urlencoded({ extended: true }));
 
+require("dotenv").config();
+
 const MongoClient = require("mongodb").MongoClient;
 app.set("view engine", "ejs");
 
@@ -26,15 +28,13 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 var db;
-MongoClient.connect(
-  "mongodb+srv://admin:qwer1234@cluster0.kbtphjb.mongodb.net/todoapp?retryWrites=true&w=majority",
-  (e, client) => {
-    db = client.db("todoapp");
-    app.listen(8080, function () {
-      console.log("listening on 8080");
-    });
-  }
-);
+MongoClient.connect(process.env.DB_URL, (e, client) => {
+  console.log(process.env.DB_URL)
+  db = client.db("todoapp");
+  app.listen(process.env.PORT, function () {
+    console.log("listening on 8080");
+  });
+});
 
 app.get("/", function (req, res) {
   res.render("index.ejs");
