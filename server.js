@@ -198,3 +198,10 @@ app.post("/join", function (req, res) {
     }
   );
 });
+
+// 회원 가입 전 id check
+app.post("/check", (req, res) => {
+  db.collection("login").findOne(req.body , (e, result) => {
+    res.send({ data: result });
+  });
+});
