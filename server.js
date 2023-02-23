@@ -29,7 +29,7 @@ const saltRounds = 10;
 
 var db;
 MongoClient.connect(process.env.DB_URL, (e, client) => {
-  console.log(process.env.DB_URL)
+  console.log(process.env.DB_URL);
   db = client.db("todoapp");
   app.listen(process.env.PORT, function () {
     console.log("listening on 8080");
@@ -219,4 +219,24 @@ app.post("/check", (req, res) => {
   db.collection("login").findOne(req.body, (e, result) => {
     res.send({ data: result });
   });
+});
+
+app.get("/search", (req, res) => {
+  let search = [
+    {
+      $search: {
+        index: "titleSearch",
+        text: {
+          query: req.query.value,
+          path: "title",
+        },
+      },
+    },
+  ];
+  db.collection("post")
+    .aggregate(search)
+    .toArray((e, result) => {
+      console.log(result);
+      res.render("search.ejs", { posts: result });
+    });
 });
