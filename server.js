@@ -283,3 +283,6 @@ app.post("/upload", upload.single("profile"), function (req, res) {
 app.get("/image/:imageName", function (req, res) {
   res.sendFile(__dirname + "/public/image/" + req.params.imageName);
 });
+
+/** 채팅 라우터 */
+app.use("/chat", require("./routes/chat.js"));
