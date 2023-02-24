@@ -103,7 +103,7 @@ app.get("/detail/:id", (req, res) => {
   db.collection("post").findOne(
     { _id: parseInt(req.params.id) },
     function (e, result) {
-      res.render("detail.ejs", { data: result, userId: req.user.id});
+      res.render("detail.ejs", { data: result, userId: req.user.id });
     }
   );
 });
@@ -245,4 +245,41 @@ app.get("/search", (req, res) => {
     .toArray((e, result) => {
       res.render("search.ejs", { posts: result, userId: req.user.id });
     });
+});
+
+app.use("/shop", require("./routes/shop.js"));
+app.use("/board/sub", require("./routes/board.js"));
+
+let multer = require("multer");
+var path = require("path");
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./public/image");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+  fileFilter: function (req, file, callback) {
+    var ext = path.extname(file.originalname);
+    if (ext !== ".png" && ext !== ".jpg" && ext !== ".jpeg") {
+      return callback(new Error("PNG, JPG만 업로드하세요"));
+    }
+    callback(null, true);
+  },
+  limits: {
+    fileSize: 1024 * 1024,
+  },
+});
+var upload = multer({ storage: storage });
+
+app.get("/upload", (req, res) => {
+  res.render("upload.ejs");
+});
+
+app.post("/upload", upload.single("profile"), function (req, res) {
+  res.send("업로드완료");
+});
+
+app.get("/image/:imageName", function (req, res) {
+  res.sendFile(__dirname + "/public/image/" + req.params.imageName);
 });
