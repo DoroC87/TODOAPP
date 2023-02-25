@@ -17,14 +17,14 @@
       <div class="row">
         <div class="col-3">
           <ul class="list-group chat-list">
-            <li class="list-group-item" data-id="">
-              <h6>채팅방1</h6>
-              <h6 class="text-small">채팅방설명</h6>
-            </li>
-            <li class="list-group-item">
-              <h6>채팅방2</h6>
-              <h6 class="text-small">채팅방설명</h6>
-            </li>
+            <% for(let i=0; i < list.length; i++){ %>
+              <li class="list-group-item" data-id="">
+                <h6>
+                  <%= list[i].title %>
+                </h6>
+                <h6 class="text-small"> <%= list[i].date %></h6>
+              </li>
+              <% } %>
           </ul>
         </div>
 

@@ -59,6 +59,7 @@ app.post("/add", (req, res) => {
       title: req.body.title,
       date: req.body.date,
       createUser: req.user.id,
+      createDate: new Date(),
     };
     db.collection("post").insertOne(insertValue, (e, postResult) => {
       db.collection("counter").updateOne(
@@ -79,7 +80,7 @@ app.post("/add", (req, res) => {
  * @param req
  * @param res respons
  */
-app.get("/list", (req, res) => {
+app.get("/list", loginCheck, (req, res) => {
   db.collection("post")
     .find()
     .toArray(function (e, result) {
@@ -284,5 +285,32 @@ app.get("/image/:imageName", function (req, res) {
   res.sendFile(__dirname + "/public/image/" + req.params.imageName);
 });
 
-/** 채팅 라우터 */
-app.use("/chat", require("./routes/chat.js"));
+/** 채팅방 */
+app.get("/chat", loginCheck, (req, res) => {
+  // 로그인 유저와 글쓴 유저의 채팅방 검색조건
+  let searchList = { member: { $in: [req.user.id] } };
+  db.collection("chatroom")
+    .find(searchList)
+    .toArray(function (e, resultList) {
+      // 로그인 유저와 글쓴 유저의 채팅방 검색조건
+      let search = { member: { $all: [req.user.id, req.query.value] } };
+      // 채팅방이 존재 하는지 확인
+      db.collection("chatroom").findOne(search, function (e, result) {
+        if (result) {
+          res.render("chat.ejs", { data: result, list: resultList });
+        } else {
+          // 없으면 채팅방 만들기
+          let chatValue = {
+            title: `채팅방 ${req.user.id} ${req.query.value}`,
+            date: new Date(),
+            member: [req.user.id, req.query.value],
+          };
+          db.collection("chatroom").insertOne(chatValue, (e, insertResult) => {
+            db.collection("chatroom").findOne(search, function (e, result) {
+              res.render("chat.ejs", { data: result, list: resultList });
+            });
+          });
+        }
+      });
+    });
+});
