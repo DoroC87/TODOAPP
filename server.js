@@ -26,6 +26,8 @@ app.use(passport.session());
  */
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+/** mongodb objectId */
+const { ObjectId } = require("mongodb");
 
 var db;
 MongoClient.connect(process.env.DB_URL, (e, client) => {
@@ -297,7 +299,11 @@ app.get("/chat", loginCheck, (req, res) => {
       // 채팅방이 존재 하는지 확인
       db.collection("chatroom").findOne(search, function (e, result) {
         if (result) {
-          res.render("chat.ejs", { data: result, list: resultList });
+          res.render("chat.ejs", {
+            chat: result,
+            list: resultList,
+            userId: req.user.id,
+          });
         } else {
           // 없으면 채팅방 만들기
           let chatValue = {
@@ -307,10 +313,60 @@ app.get("/chat", loginCheck, (req, res) => {
           };
           db.collection("chatroom").insertOne(chatValue, (e, insertResult) => {
             db.collection("chatroom").findOne(search, function (e, result) {
-              res.render("chat.ejs", { data: result, list: resultList });
+              res.render("chat.ejs", {
+                chat: result,
+                list: resultList,
+                userId: req.user.id,
+              });
             });
           });
         }
       });
     });
+});
+
+app.post("/message", loginCheck, function (req, res) {
+  console.log("message Start");
+  let data = {
+    parent: req.body.parent,
+    content: req.body.content,
+    userid: req.user.id,
+    data: new Date(),
+  };
+  db.collection("message")
+    .insertOne(data)
+    .then(() => {
+      console.log("채팅저장성공");
+      res.send("채팅저장성공");
+    });
+});
+
+app.get("/message/:id", loginCheck, function (req, res) {
+  console.log("chat find");
+  res.writeHead(200, {
+    Connection: "keep-alive",
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+  });
+  db.collection("message")
+    .find({ parent: req.params.id })
+    .toArray()
+    .then((result) => {
+      res.write("event: test\n");
+      res.write(`data: ${JSON.stringify(result)}\n\n`);
+    });
+
+  const pipeline = [
+    {
+      $match: {
+        "fullDocument.parent": req.params.id,
+      },
+    },
+  ];
+  const collection = db.collection("message");
+  const changeStram = collection.watch(pipeline);
+  changeStram.on("change", (result) => {
+    res.write("event: test\n");
+    res.write(`data: ${JSON.stringify([result.fullDocument])}\n\n`);
+  });
 });
