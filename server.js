@@ -29,11 +29,17 @@ const saltRounds = 10;
 /** mongodb objectId */
 const { ObjectId } = require("mongodb");
 
+/** socket.io */
+const http = require("http").createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(http);
+
 var db;
 MongoClient.connect(process.env.DB_URL, (e, client) => {
   console.log(process.env.DB_URL);
   db = client.db("todoapp");
-  app.listen(process.env.PORT, function () {
+  http.listen(process.env.PORT, function () {
+    // app.listen(process.env.PORT, function () {
     console.log("listening on 8080");
   });
 });
@@ -368,5 +374,29 @@ app.get("/message/:id", loginCheck, function (req, res) {
   changeStram.on("change", (result) => {
     res.write("event: test\n");
     res.write(`data: ${JSON.stringify([result.fullDocument])}\n\n`);
+  });
+});
+
+app.get("/socket", (req, res) => {
+  res.render("socket.ejs");
+});
+// socket.io 접속
+io.on("connection", function (socket) {
+  console.log("user 접속됨");
+  // 유저 -> 서버
+  socket.on("user-send", function (data) {
+    console.log(data);
+    // 서버 -> 유저
+    io.emit("broadcast", data);
+  });
+  // 채팅방
+  socket.on("joinroom", function (data) {
+    socket.join("room1");
+  });
+  // 채팅방1유저 -> 서버
+  socket.on("room1-send", function (data) {
+    console.log(data);
+    // 서버 -> 채팅방1유저유저
+    io.to("room1").emit("broadcast", data);
   });
 });
